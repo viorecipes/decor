@@ -47,11 +47,11 @@ document.addEventListener('DOMContentLoaded', function() {
     function populateMainContent(term) {
         const newTitle = generateSeoTitle(term);
         const capitalizedTermForArticle = capitalizeEachWord(term);
-        document.title = `${newTitle} | Home Decor`; // Mengubah nama blog
+        document.title = `${newTitle} | HomeDecorSpot`; // Mengubah nama blog
         detailTitle.textContent = newTitle;
 
-        // Mengubah parameter gambar agar lebih sesuai dengan dekorasi
-        const imageUrl = `https://tse1.mm.bing.net/th?q=${encodeURIComponent(term)} home decor interior design&w=1200&h=800&c=7&rs=1&p=0&dpr=1.5&pid=1.7`;
+        // ▼▼▼ imageUrl TIDAK DIRUBAH (sesuai permintaan) ▼▼▼
+        const imageUrl = `https://tse1.mm.bing.net/th?q=${encodeURIComponent(term)}&w=1200&h=800&c=7&rs=1&p=0&dpr=1.5&pid=1.7`;
         detailImageContainer.innerHTML = `<img src="${imageUrl}" alt="${newTitle}">`;
 
         // ▼▼▼ PERUBAHAN: ARTIKEL BARU untuk Home Decor dengan format Spintax ▼▼▼
@@ -115,41 +115,31 @@ document.addEventListener('DOMContentLoaded', function() {
         detailBody.innerHTML = processSpintax(spintaxArticleTemplate);
     }
 
+    // ▼▼▼ generateRelatedPosts TIDAK DIRUBAH (sesuai permintaan) ▼▼▼
     function generateRelatedPosts(term) {
-        // Menambahkan kata kunci 'decor' ke query pencarian saran
-        const searchQuery = `${term} decor ideas`; 
         const script = document.createElement('script');
-        script.src = `https://suggestqueries.google.com/complete/search?jsonp=handleRelatedSuggest&hl=en&client=firefox&q=${encodeURIComponent(searchQuery)}`;
+        script.src = `https://suggestqueries.google.com/complete/search?jsonp=handleRelatedSuggest&hl=en&client=firefox&q=${encodeURIComponent(term)}`;
         document.head.appendChild(script);
         script.onload = () => script.remove();
-        script.onerror = () => { relatedPostsContainer.innerHTML = '<div class="loading-placeholder">Could not load related design ideas.</div>'; script.remove(); }
+        script.onerror = () => { relatedPostsContainer.innerHTML = '<div class="loading-placeholder">Could not load related recipes.</div>'; script.remove(); }
     }
 
     window.handleRelatedSuggest = function(data) {
         const suggestions = data[1];
         relatedPostsContainer.innerHTML = '';
-        if (!suggestions || suggestions.length === 0) { 
-            relatedPostsContainer.closest('.related-posts-section').style.display = 'none'; 
-            return; 
-        }
+        if (!suggestions || suggestions.length === 0) { relatedPostsContainer.closest('.related-posts-section').style.display = 'none'; return; }
         const originalKeyword = keyword.toLowerCase();
         let relatedCount = 0;
         suggestions.forEach(relatedTerm => {
-            // Memastikan saran bukan keyword asli dan membatasi jumlah
-            if (relatedTerm.toLowerCase().includes(originalKeyword) && relatedTerm.toLowerCase() !== originalKeyword && relatedCount < 11) {
-                 relatedCount++;
-                 // Mengambil kata kunci utama dari saran yang lebih panjang
-                 const cleanTerm = relatedTerm.replace(/ design ideas| home decor| inspiration/gi, '').trim(); 
-
-                 const keywordForUrl = cleanTerm.replace(/\s/g, '-').toLowerCase();
-                 const linkUrl = `detail.html?q=${encodeURIComponent(keywordForUrl)}`;
-                
-                 // Mengubah parameter gambar agar lebih relevan dengan dekorasi
-                 const imageUrl = `https://tse1.mm.bing.net/th?q=${encodeURIComponent(cleanTerm)} interior&w=600&h=900&c=7&rs=1&p=0&dpr=1.5&pid=1.7`;
-                 const newRelatedTitle = generateSeoTitle(cleanTerm);
-                 const card = `<article class="content-card"><a href="${linkUrl}"><img src="${imageUrl}" alt="${newRelatedTitle}" loading="lazy"><div class="content-card-body"><h3>${newRelatedTitle}</h3></div></a></article>`;
-                 relatedPostsContainer.innerHTML += card;
-            }
+            if (relatedTerm.toLowerCase() === originalKeyword || relatedCount >= 11) return;
+            relatedCount++;
+            const keywordForUrl = relatedTerm.replace(/\s/g, '-').toLowerCase();
+            const linkUrl = `detail.html?q=${encodeURIComponent(keywordForUrl)}`;
+            
+            const imageUrl = `https://tse1.mm.bing.net/th?q=${encodeURIComponent(relatedTerm)}&w=600&h=900&c=7&rs=1&p=0&dpr=1.5&pid=1.7`;
+            const newRelatedTitle = generateSeoTitle(relatedTerm);
+            const card = `<article class="content-card"><a href="${linkUrl}"><img src="${imageUrl}" alt="${newRelatedTitle}" loading="lazy"><div class="content-card-body"><h3>${newRelatedTitle}</h3></div></a></article>`;
+            relatedPostsContainer.innerHTML += card;
         });
         if (relatedCount === 0) { relatedPostsContainer.closest('.related-posts-section').style.display = 'none'; }
     };
